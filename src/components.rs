@@ -20,3 +20,15 @@ pub struct BoxSpot {}
 pub struct Movable;
 
 pub struct Immovable;
+#[derive(Default)]
+pub enum GameplayState {
+    #[default]
+    Playing,
+    Won,
+}
+
+#[derive(Default)]
+pub struct Gameplay {
+    pub state: GameplayState,
+    pub moves_count: u32,
+}
