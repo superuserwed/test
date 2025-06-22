@@ -24,6 +24,7 @@ struct Game {
 
 // ANCHOR: handler
 impl event::EventHandler<ggez::GameError> for Game {
+    // ANCHOR: update
     fn update(&mut self, context: &mut Context) -> GameResult {
         // Run input system
         {
@@ -35,8 +36,16 @@ impl event::EventHandler<ggez::GameError> for Game {
             systems::gameplay::run_gameplay_state(&self.world);
         }
 
+        // Get and update time resource
+        {
+            let mut query = self.world.query::<&mut crate::components::Time>();
+            let time = query.iter().next().unwrap().1;
+            time.delta += context.time.delta();
+        }
+
         Ok(())
     }
+    // ANCHOR_END: update
 
     fn draw(&mut self, context: &mut Context) -> GameResult {
         // Render game entities
@@ -54,6 +63,7 @@ pub fn main() -> GameResult {
     let mut world = World::new();
     map::initialize_level(&mut world);
     entities::create_gameplay(&mut world);
+    entities::create_time(&mut world);
 
     // Create a game context and event loop
     let context_builder = ggez::ContextBuilder::new("rust_sokoban", "sokoban")

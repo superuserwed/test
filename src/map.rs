@@ -2,7 +2,6 @@ use crate::components::{BoxColour, Position};
 use crate::entities::*;
 use hecs::World;
 
-// ANCHOR: initialize_level
 pub fn initialize_level(world: &mut World) {
     const MAP: &str = "
     N N W W W W W W
@@ -18,7 +17,6 @@ pub fn initialize_level(world: &mut World) {
 
     load_map(world, MAP.to_string());
 }
-// ANCHOR_END: initialize_level
 
 pub fn load_map(world: &mut World, map_string: String) {
     // read all lines
@@ -36,7 +34,6 @@ pub fn load_map(world: &mut World, map_string: String) {
             };
 
             // Figure out what object we should create
-            // ANCHOR: map_match
             match *column {
                 "." => {
                     create_floor(world, position);
@@ -68,7 +65,6 @@ pub fn load_map(world: &mut World, map_string: String) {
                 "N" => (),
                 c => panic!("unrecognized map item {}", c),
             }
-            // ANCHOR_END: map_match
         }
     }
 }
