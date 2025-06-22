@@ -21,26 +21,28 @@ pub fn create_floor(world: &mut World, position: Position) -> Entity {
     ))
 }
 
-pub fn create_box(world: &mut World, position: Position) -> Entity {
+// ANCHOR: create_box
+pub fn create_box(world: &mut World, position: Position, colour: BoxColour) -> Entity {
     world.spawn((
         Position { z: 10, ..position },
         Renderable {
-            path: "/images/box.png".to_string(),
+            path: format!("/images/box_{}.png", colour),
         },
-        Box {},
+        Box { colour },
         Movable {},
     ))
 }
 
-pub fn create_box_spot(world: &mut World, position: Position) -> Entity {
+pub fn create_box_spot(world: &mut World, position: Position, colour: BoxColour) -> Entity {
     world.spawn((
         Position { z: 9, ..position },
         Renderable {
-            path: "/images/box_spot.png".to_string(),
+            path: format!("/images/box_spot_{}.png", colour),
         },
-        BoxSpot {},
+        BoxSpot { colour },
     ))
 }
+// ANCHOR_END: create_box
 
 pub fn create_player(world: &mut World, position: Position) -> Entity {
     world.spawn((
