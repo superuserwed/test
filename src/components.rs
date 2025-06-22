@@ -2,6 +2,8 @@ use std::fmt;
 use std::fmt::Display;
 use std::time::Duration;
 
+use crate::events::Event;
+
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Position {
     pub x: u8,
@@ -9,22 +11,16 @@ pub struct Position {
     pub z: u8,
 }
 
-// ANCHOR: renderable
 pub struct Renderable {
     paths: Vec<String>,
 }
-// ANCHOR_END: renderable
 
-// ANCHOR: renderable_kind
 pub enum RenderableKind {
     Static,
     Animated,
 }
-// ANCHOR_END: renderable_kind
 
-// ANCHOR: renderable_impl
 impl Renderable {
-    // ANCHOR: renderable_new_fn
     pub fn new_static(path: &str) -> Self {
         Self {
             paths: vec![path.to_string()],
@@ -36,10 +32,7 @@ impl Renderable {
             paths: paths.iter().map(|p| p.to_string()).collect(),
         }
     }
-    // ANCHOR_END: renderable_new_fn
-    // ANCHOR_END: renderable_impl
 
-    // ANCHOR: renderable_kind_fn
     pub fn kind(&self) -> RenderableKind {
         match self.paths.len() {
             0 => panic!("invalid renderable"),
@@ -47,16 +40,13 @@ impl Renderable {
             _ => RenderableKind::Animated,
         }
     }
-    // ANCHOR_END: renderable_kind_fn
 
-    // ANCHOR: renderable_path_fn
     pub fn path(&self, path_index: usize) -> String {
         // If we get asked for a path that is larger than the
         // number of paths we actually have, we simply mod the index
         // with the length to get an index that is in range.
         self.paths[path_index % self.paths.len()].clone()
     }
-    // ANCHOR_END: renderable_path_fn
 }
 
 pub struct Wall {}
@@ -114,9 +104,14 @@ pub struct Gameplay {
     pub moves_count: u32,
 }
 
-// ANCHOR: create_time
 #[derive(Default)]
 pub struct Time {
     pub delta: Duration,
 }
-// ANCHOR_END: create_time
+
+// ANCHOR: events
+#[derive(Default)]
+pub struct EventQueue {
+    pub events: Vec<Event>,
+}
+// ANCHOR_END: events
