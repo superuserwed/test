@@ -1,3 +1,3 @@
 pub mod input;
 pub mod rendering;
-mod gameplay;
+pub(crate) mod gameplay;
