@@ -2028,6 +2028,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-sokoban"
+version = "0.1.0"
+dependencies = [
+ "ggez",
+ "glam",
+ "hecs",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2215,14 +2224,6 @@ dependencies = [
  "wayland-client",
  "wayland-cursor",
  "wayland-protocols",
-]
-
-[[package]]
-name = "software"
-version = "0.1.0"
-dependencies = [
- "ggez",
- "hecs",
 ]
 
 [[package]]

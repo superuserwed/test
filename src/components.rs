@@ -1,3 +1,7 @@
+use ggez::audio;
+use ggez::audio::SoundSource;
+use ggez::Context;
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
 use std::time::Duration;
@@ -109,9 +113,26 @@ pub struct Time {
     pub delta: Duration,
 }
 
-// ANCHOR: events
 #[derive(Default)]
 pub struct EventQueue {
     pub events: Vec<Event>,
 }
-// ANCHOR_END: events
+
+// ANCHOR: audio_store
+#[derive(Default)]
+pub struct AudioStore {
+    pub sounds: HashMap<String, std::boxed::Box<audio::Source>>,
+}
+// ANCHOR_END: audio_store
+
+// ANCHOR: audio_store_impl
+impl AudioStore {
+    pub fn play_sound(&mut self, context: &mut Context, sound: &str) {
+        if let Some(source) = self.sounds.get_mut(sound) {
+            if source.play_detached(context).is_ok() {
+                println!("Playing sound: {}", sound);
+            }
+        }
+    }
+}
+// ANCHOR_END: audio_store_impl
