@@ -4,16 +4,22 @@ use ggez::{
 };
 use glam::Vec2;
 use hecs::{Entity, World};
+// ANCHOR: use_itertools
+use itertools::Itertools;
+// ANCHOR_END: use_itertools
 
+use std::collections::HashMap;
 use std::time::Duration;
 
 use crate::components::*;
 use crate::constants::*;
 
+// ANCHOR: run_rendering
 pub fn run_rendering(world: &World, context: &mut Context) {
     // Clearing the screen (this gives us the background colour)
     let mut canvas =
         graphics::Canvas::from_frame(context, graphics::Color::from([0.95, 0.95, 0.95, 1.0]));
+    // ANCHOR_END: run_rendering
 
     // Get time
     let mut query = world.query::<&Time>();
@@ -25,18 +31,47 @@ pub fn run_rendering(world: &World, context: &mut Context) {
     let mut rendering_data: Vec<(Entity, (&Position, &Renderable))> = query.into_iter().collect();
     rendering_data.sort_by_key(|&k| k.1 .0.z);
 
-    // Iterate through all pairs of positions & renderables, load the image
-    // and draw it at the specified position.
+    // ANCHOR: rendering_batches
+    let mut rendering_batches: HashMap<u8, HashMap<String, Vec<DrawParam>>> = HashMap::new();
+
+    // Iterate each of the renderables, determine which image path should be rendered
+    // at which drawparams, and then add that to the rendering_batches.
     for (_, (position, renderable)) in rendering_data.iter() {
         // Load the image
-        let image = get_image(context, renderable, time.delta);
+        let image_path = get_image(renderable, time.delta);
         let x = position.x as f32 * TILE_WIDTH;
         let y = position.y as f32 * TILE_WIDTH;
+        let z = position.z;
 
         // draw
-        let draw_params = DrawParam::new().dest(Vec2::new(x, y));
-        canvas.draw(&image, draw_params);
+        let draw_param = DrawParam::new().dest(Vec2::new(x, y));
+        rendering_batches
+            .entry(z)
+            .or_default()
+            .entry(image_path)
+            .or_default()
+            .push(draw_param);
     }
+    // ANCHOR_END: rendering_batches
+
+    // ANCHOR: rendering_batches_2
+    // Iterate spritebatches ordered by z and actually render each of them
+    for (_z, group) in rendering_batches
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&a.0, &b.0))
+    {
+        for (image_path, draw_params) in group {
+            let image = Image::from_path(context, image_path).unwrap();
+            let mut mesh_batch = graphics::InstanceArray::new(context, Some(image));
+
+            for draw_param in draw_params.iter() {
+                mesh_batch.push(*draw_param);
+            }
+
+            canvas.draw(&mesh_batch, graphics::DrawParam::new());
+        }
+    }
+    // ANCHOR_END: rendering_batches_2
 
     // Render any text
     let mut query = world.query::<&Gameplay>();
@@ -44,10 +79,18 @@ pub fn run_rendering(world: &World, context: &mut Context) {
     draw_text(&mut canvas, &gameplay.state.to_string(), 525.0, 80.0);
     draw_text(&mut canvas, &gameplay.moves_count.to_string(), 525.0, 100.0);
 
+    // ANCHOR: render_fps
+    // Render FPS
+    let fps = format!("FPS: {:.0}", context.time.fps());
+    draw_text(&mut canvas, &fps, 525.0, 120.0);
+    // ANCHOR_END: render_fps
+
+    // ANCHOR: run_rendering_end
     // Finally, present the canvas, this will actually display everything
     // on the screen.
     canvas.finish(context).expect("expected to present");
 }
+// ANCHOR_END: run_rendering_end
 
 pub fn draw_text(canvas: &mut Canvas, text_string: &str, x: f32, y: f32) {
     let text = Text::new(TextFragment {
@@ -60,7 +103,8 @@ pub fn draw_text(canvas: &mut Canvas, text_string: &str, x: f32, y: f32) {
     canvas.draw(&text, Vec2::new(x, y));
 }
 
-pub fn get_image(context: &mut Context, renderable: &Renderable, delta: Duration) -> Image {
+// ANCHOR: get_image
+pub fn get_image(renderable: &Renderable, delta: Duration) -> String {
     let path_index = match renderable.kind() {
         RenderableKind::Static => {
             // We only have one image, so we just return that
@@ -76,7 +120,6 @@ pub fn get_image(context: &mut Context, renderable: &Renderable, delta: Duration
         }
     };
 
-    let image_path = renderable.path(path_index);
-
-    Image::from_path(context, image_path).unwrap()
+    renderable.path(path_index)
 }
+// ANCHOR_END: get_image
