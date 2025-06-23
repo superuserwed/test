@@ -10,6 +10,7 @@ use std::path;
 mod components;
 mod constants;
 mod entities;
+mod events;
 mod map;
 mod systems;
 
@@ -24,7 +25,6 @@ struct Game {
 
 // ANCHOR: handler
 impl event::EventHandler<ggez::GameError> for Game {
-    // ANCHOR: update
     fn update(&mut self, context: &mut Context) -> GameResult {
         // Run input system
         {
@@ -36,6 +36,11 @@ impl event::EventHandler<ggez::GameError> for Game {
             systems::gameplay::run_gameplay_state(&self.world);
         }
 
+        // Run events processing
+        {
+            systems::events::run_process_events(&mut self.world);
+        }
+
         // Get and update time resource
         {
             let mut query = self.world.query::<&mut crate::components::Time>();
@@ -45,7 +50,6 @@ impl event::EventHandler<ggez::GameError> for Game {
 
         Ok(())
     }
-    // ANCHOR_END: update
 
     fn draw(&mut self, context: &mut Context) -> GameResult {
         // Render game entities
@@ -64,6 +68,7 @@ pub fn main() -> GameResult {
     map::initialize_level(&mut world);
     entities::create_gameplay(&mut world);
     entities::create_time(&mut world);
+    entities::create_event_queue(&mut world);
 
     // Create a game context and event loop
     let context_builder = ggez::ContextBuilder::new("rust_sokoban", "sokoban")

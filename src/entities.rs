@@ -17,7 +17,6 @@ pub fn create_floor(world: &mut World, position: Position) -> Entity {
     ))
 }
 
-// ANCHOR: create_box
 pub fn create_box(world: &mut World, position: Position, colour: BoxColour) -> Entity {
     world.spawn((
         Position { z: 10, ..position },
@@ -37,7 +36,6 @@ pub fn create_box_spot(world: &mut World, position: Position, colour: BoxColour)
         BoxSpot { colour },
     ))
 }
-// ANCHOR_END: create_box
 
 pub fn create_player(world: &mut World, position: Position) -> Entity {
     world.spawn((
@@ -56,8 +54,10 @@ pub fn create_gameplay(world: &mut World) -> Entity {
     world.spawn((Gameplay::default(),))
 }
 
-// ANCHOR: create_time
 pub fn create_time(world: &mut World) -> Entity {
     world.spawn((Time::default(),))
 }
-// ANCHOR_END: create_time
+
+pub fn create_event_queue(world: &mut World) -> Entity {
+    world.spawn((EventQueue::default(),))
+}
